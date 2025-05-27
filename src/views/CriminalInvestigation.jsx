@@ -1,8 +1,9 @@
-// src/views/CriminalInvestigation.jsx
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const CriminalInvestigation = () => {
+  const navigate = useNavigate();
+
   // Estado para simular casos activos (puedes reemplazar con datos reales después)
   const [cases, setCases] = useState([
     {
@@ -141,6 +142,14 @@ export const CriminalInvestigation = () => {
           </button>
         </form>
       </section>
+
+      {/* Botón para regresar */}
+      <button
+        onClick={() => navigate("/home-admin")}
+        className="mt-12 px-8 py-3 bg-[#00afd0] text-black font-bold rounded-lg hover:brightness-125 transition"
+      >
+        ← Volver a Inicio
+      </button>
     </div>
   );
 };

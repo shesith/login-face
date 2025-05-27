@@ -53,6 +53,7 @@ export const HomeAdmin = () => {
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
           >
             <button
+              onClick={() => navigate("/learn-more")}
               className="relative px-6 py-3 text-[#BBF8F9] font-medium transition hover:brightness-110 cursor-pointer z-10"
               style={{
                 clipPath:
@@ -108,7 +109,7 @@ export const HomeAdmin = () => {
           </div>
 
           <div 
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/investigation")}
           className="relative w-60 h-80 transition-transform duration-400 hover:scale-105 cursor-pointer">
             <img
               className="absolute inset-0 w-full h-full"
