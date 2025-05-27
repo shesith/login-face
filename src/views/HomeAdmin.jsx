@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Menu } from "../components/Menu";
 import { GetImageUrl } from "../utils/getImageUrl";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
 
 export const HomeAdmin = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
   return (
     <article className="flex">
       <Menu isOpen={isOpen} setIsOpen={setIsOpen} />
@@ -76,7 +79,9 @@ export const HomeAdmin = () => {
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
           className="flex items-center text-white gap-8 "
         >
-          <div className="relative w-60 h-70 transition-transform duration-400 hover:scale-105 cursor-pointer">
+          <div 
+          onClick={() => navigate("/investigation")}
+          className="relative w-60 h-70 transition-transform duration-400 hover:scale-105 cursor-pointer">
             <img
               className="absolute inset-0 w-full h-full "
               src={GetImageUrl("marco", "png")}
@@ -102,7 +107,9 @@ export const HomeAdmin = () => {
             </motion.p>
           </div>
 
-          <div className="relative w-60 h-80 transition-transform duration-400 hover:scale-105 cursor-pointer">
+          <div 
+          onClick={() => navigate("/profile")}
+          className="relative w-60 h-80 transition-transform duration-400 hover:scale-105 cursor-pointer">
             <img
               className="absolute inset-0 w-full h-full"
               src={GetImageUrl("marco", "png")}
@@ -126,7 +133,9 @@ export const HomeAdmin = () => {
             </motion.p>
           </div>
 
-          <div className="relative w-60 h-70 transition-transform duration-400 hover:scale-105 cursor-pointer">
+          <div 
+          onClick={() => navigate("/report")}
+          className="relative w-60 h-70 transition-transform duration-400 hover:scale-105 cursor-pointer">
             <img
               className="absolute inset-0 w-full h-full"
               src={GetImageUrl("marco", "png")}
