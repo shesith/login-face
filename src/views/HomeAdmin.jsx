@@ -109,7 +109,7 @@ export const HomeAdmin = () => {
           </div>
 
           <div 
-          onClick={() => navigate("/investigation")}
+          onClick={() => navigate("/profile")}
           className="relative w-60 h-80 transition-transform duration-400 hover:scale-105 cursor-pointer">
             <img
               className="absolute inset-0 w-full h-full"
