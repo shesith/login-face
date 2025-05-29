@@ -4,9 +4,11 @@ import { loadModel, predictFace } from "../utils/faceRecognition";
 import { GetImageUrl } from "../utils/getImageUrl";
 
 export const Login = () => {
+  const [spinning, setSpinning] = useState(true);
   const webcamRef = useRef(null);
   const [agentName, setAgentName] = useState("");
   const [intruderAlert, setIntruderAlert] = useState(false);
+  const [showAccessAlert, setShowAccessAlert] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,12 +45,17 @@ export const Login = () => {
       highestPrediction.probability > 0.8
     ) {
       setAgentName(highestPrediction.className);
+      setShowAccessAlert(true);
+      setSpinning(true);
 
-      if (highestPrediction.className.trim() === "Abigail Miñano") {
+      setTimeout(() => {
+        setSpinning(false); // Detener giro después de 2 segundos
+      }, 2000);
+
+      setTimeout(() => {
+        setShowAccessAlert(false);
         navigate("/home-admin");
-      } else if (highestPrediction.className.trim() === "Luis Adrian") {
-        navigate("/home-admin");
-      }
+      }, 3000); // 3 segundos para mostrar el mensaje
     } else {
       // 🔥 Reproducir sonido de alerta y detenerlo después de 3 segundos
       const audio = new Audio("/public/sounds/alarm.mp3");
@@ -67,12 +74,32 @@ export const Login = () => {
 
   return (
     <div className="flex items-center justify-center gap-20 relative w-full h-screen bg-black text-white">
+      {/* ALERTA DE INTRUSO */}
       {intruderAlert && (
         <div className="fixed top-0 left-0 w-full h-full bg-red-800 text-white text-6xl font-bold flex items-center justify-center animate-flicker z-[999]">
           🚨 INTRUSO DETECTADO 🚨
         </div>
       )}
 
+      {/* ALERTA DE ACCESO CONCEDIDO */}
+      {showAccessAlert && agentName && (
+        <div className="fixed top-0 left-0 w-full h-full bg-[#063e4e]/95 flex items-center justify-center z-[999]">
+          <div className="bg-[#034655] text-black px-16 py-12 rounded-2xl shadow-2xl border-4 border-[#0a0a0a] flex flex-row items-center gap-8 animate-fade-in">
+            <img
+              className={`w-[120px] transition-all duration-500 ${
+                spinning ? "spin-animation" : ""
+              }`}
+              src={GetImageUrl("marco-circular", "png")}
+              alt="check"
+              style={{ minWidth: 120 }}
+            />
+            <div className="flex flex-col items-start">
+              <span className="text-4xl font-bold mb-2">Acceso concedido</span>
+              <span className="text-2xl font-mono">a: {agentName}</span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex absolute top-20 left-15 opacity-45">
         <img
           className="w-[250px]"
@@ -143,12 +170,6 @@ export const Login = () => {
           ACCEDER
         </button>
       </div>
-
-      {agentName && (
-        <h2 className="text-green-500 text-2xl mt-4 font-mono">
-          Acceso concedido a: {agentName}
-        </h2>
-      )}
     </div>
   );
 };

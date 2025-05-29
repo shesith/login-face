@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-export const CriminalInvestigation = () => {
-  const navigate = useNavigate();
-
-  // Estado para simular casos activos (puedes reemplazar con datos reales después)
-  const [cases, setCases] = useState([
+const getCasesFromStorage = () => {
+  const stored = localStorage.getItem("cases");
+  if (stored) return JSON.parse(stored);
+  // Casos por defecto si no hay nada en storage
+  return [
     {
       id: 1,
       title: "Robo en joyería central",
       status: "En progreso",
-      description: "Investigando el robo ocurrido el 15 de mayo en la joyería del centro.",
+      description:
+        "Investigando el robo ocurrido el 15 de mayo en la joyería del centro.",
       dateReported: "2025-05-20",
     },
     {
@@ -20,37 +21,80 @@ export const CriminalInvestigation = () => {
       description: "Posible esquema de phishing afectando varias cuentas.",
       dateReported: "2025-05-22",
     },
-  ]);
+  ];
+};
 
-  // Función para simular cerrar un caso
+export const CriminalInvestigation = () => {
+  const navigate = useNavigate();
+  const [cases, setCases] = useState(getCasesFromStorage());
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    status: "Pendiente",
+  });
+
+  useEffect(() => {
+    localStorage.setItem("cases", JSON.stringify(cases));
+  }, [cases]);
+
   const closeCase = (id) => {
     setCases((prevCases) =>
+      prevCases.map((c) => (c.id === id ? { ...c, status: "Cerrado" } : c))
+    );
+  };
+
+  const startEdit = (caso) => {
+    setEditingId(caso.id);
+    setEditForm({
+      title: caso.title,
+      description: caso.description,
+      status: caso.status,
+    });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const saveEdit = (id) => {
+    setCases((prevCases) =>
       prevCases.map((c) =>
-        c.id === id ? { ...c, status: "Cerrado" } : c
+        c.id === id
+          ? {
+              ...c,
+              title: editForm.title,
+              description: editForm.description,
+              status: editForm.status,
+            }
+          : c
       )
     );
+    setEditingId(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white px-8 py-12 flex flex-col items-center">
-      {/* Título principal */}
       <h1 className="text-6xl font-bold mb-6 text-[#63DAF1] font-bicubik animate-pulse">
         Criminal Investigation
       </h1>
-
-      {/* Descripción general */}
       <p className="max-w-4xl text-center text-[#BBF8F9] text-xl font-light mb-12 leading-relaxed">
-        Bienvenido al centro de investigaciones. Aquí puedes consultar los casos activos, 
-        revisar evidencias, administrar perfiles y mantener el orden en nuestra comunidad.
-        La seguridad y la precisión son nuestra prioridad.
+        Bienvenido al centro de investigaciones. Aquí puedes consultar los casos
+        activos, revisar evidencias, administrar perfiles y mantener el orden en
+        nuestra comunidad. La seguridad y la precisión son nuestra prioridad.
       </p>
-
-      {/* Lista de casos activos */}
       <section className="w-full max-w-5xl">
         <h2 className="text-3xl font-semibold mb-6 border-b border-[#00afd0] pb-2">
           Casos Activos
         </h2>
-
         {cases.length === 0 ? (
           <p className="text-center text-gray-400 text-lg">
             No hay casos activos por ahora.
@@ -62,15 +106,58 @@ export const CriminalInvestigation = () => {
                 key={id}
                 className="bg-[#111111] rounded-xl p-6 shadow-lg border border-[#00afd0] flex flex-col md:flex-row justify-between items-start md:items-center"
               >
-                <div className="mb-4 md:mb-0 max-w-xl">
-                  <h3 className="text-2xl font-semibold text-[#63DAF1] mb-1">
-                    {title}
-                  </h3>
-                  <p className="text-gray-300 mb-2">{description}</p>
-                  <p className="text-gray-500 text-sm">
-                    Reportado: <time dateTime={dateReported}>{dateReported}</time>
-                  </p>
-                </div>
+                {editingId === id ? (
+                  <div className="mb-4 md:mb-0 max-w-xl w-full">
+                    <input
+                      type="text"
+                      name="title"
+                      value={editForm.title}
+                      onChange={handleEditChange}
+                      className="mb-2 w-full rounded bg-[#222] border border-[#63DAF1] p-2 text-white"
+                    />
+                    <textarea
+                      name="description"
+                      value={editForm.description}
+                      onChange={handleEditChange}
+                      className="mb-2 w-full rounded bg-[#222] border border-[#63DAF1] p-2 text-white"
+                      rows={2}
+                    />
+                    <select
+                      name="status"
+                      value={editForm.status}
+                      onChange={handleEditChange}
+                      className="mb-2 w-full rounded bg-[#222] border border-[#63DAF1] p-2 text-white"
+                    >
+                      <option value="En progreso">En progreso</option>
+                      <option value="Pendiente">Pendiente</option>
+                    </select>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => saveEdit(id)}
+                        className="px-4 py-1 rounded bg-green-500 text-black font-semibold hover:bg-green-600 transition"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="px-4 py-1 rounded bg-gray-600 text-white font-semibold hover:bg-gray-700 transition"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4 md:mb-0 max-w-xl">
+                    <h3 className="text-2xl font-semibold text-[#63DAF1] mb-1">
+                      {title}
+                    </h3>
+                    <p className="text-gray-300 mb-2">{description}</p>
+                    <p className="text-gray-500 text-sm">
+                      Reportado:{" "}
+                      <time dateTime={dateReported}>{dateReported}</time>
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex flex-col md:items-end">
                   <span
@@ -84,15 +171,24 @@ export const CriminalInvestigation = () => {
                   >
                     {status}
                   </span>
-
-                  {/* Solo mostrar botón si el caso no está cerrado */}
-                  {status !== "Cerrado" && (
-                    <button
-                      onClick={() => closeCase(id)}
-                      className="px-4 py-2 rounded bg-[#63DAF1] text-black font-semibold hover:bg-[#52b7c6] transition"
-                    >
-                      Marcar como cerrado
-                    </button>
+                  {/* Solo mostrar botones si el caso no está cerrado */}
+                  {status !== "Cerrado" && editingId !== id && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => closeCase(id)}
+                        className="px-4 py-2 rounded bg-[#63DAF1] text-black font-semibold hover:bg-[#52b7c6] transition"
+                      >
+                        Marcar como cerrado
+                      </button>
+                      <button
+                        onClick={() =>
+                          startEdit({ id, title, description, status })
+                        }
+                        className="px-4 py-2 rounded bg-yellow-400 text-black font-semibold hover:bg-yellow-500 transition"
+                      >
+                        Editar
+                      </button>
+                    </div>
                   )}
                 </div>
               </li>
@@ -100,50 +196,6 @@ export const CriminalInvestigation = () => {
           </ul>
         )}
       </section>
-
-      {/* Sección de contacto para reportar un nuevo caso */}
-      <section className="w-full max-w-5xl mt-16 bg-[#0c0c0c] rounded-2xl p-8 border border-[#00afd0] shadow-2xl">
-        <h2 className="text-3xl font-semibold mb-6 border-b border-[#00afd0] pb-2 text-[#63DAF1]">
-          Reportar un nuevo caso
-        </h2>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            alert("Funcionalidad aún no implementada.");
-          }}
-          className="flex flex-col gap-6"
-        >
-          <label className="flex flex-col gap-2 text-white font-semibold">
-            Título del caso:
-            <input
-              type="text"
-              placeholder="Ejemplo: Robo en la joyería"
-              className="rounded bg-[#111111] border border-[#00afd0] p-3 focus:outline-none focus:ring-2 focus:ring-[#63DAF1] text-white"
-              required
-            />
-          </label>
-
-          <label className="flex flex-col gap-2 text-white font-semibold">
-            Descripción:
-            <textarea
-              placeholder="Describe el caso con detalles"
-              rows={4}
-              className="rounded bg-[#111111] border border-[#00afd0] p-3 focus:outline-none focus:ring-2 focus:ring-[#63DAF1] text-white"
-              required
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="self-start bg-[#63DAF1] text-black font-bold px-6 py-3 rounded hover:bg-[#52b7c6] transition"
-          >
-            Enviar reporte
-          </button>
-        </form>
-      </section>
-
-      {/* Botón para regresar */}
       <button
         onClick={() => navigate("/home-admin")}
         className="mt-12 px-8 py-3 bg-[#00afd0] text-black font-bold rounded-lg hover:brightness-125 transition"
